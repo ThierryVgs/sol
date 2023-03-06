@@ -68,87 +68,106 @@ class Pile_Sequence(Sequence):
 ###############################
 # CLASS : Foundation_Sequence #
 ###############################
-class Foundation_Sequence(Sequence):
-    def move(self, destination):
-        # On ne peut pas déplacer de carte depuis la séquence foundation
-        pass
+def move(self, destination):
+        """Déplace la carte du dessus de la pile vers la destination"""
+        if self.is_valid_move(destination):
+            destination.append(self.pop())
 
-    def is_valid_move(self, destination):
-        # On ne peut pas déplacer de carte vers la séquence foundation depuis une autre séquence
-        return False
+    def is_valid_move(self, card):
+        """Vérifie si le déplacement de la carte vers la fondation est valide"""
+        if not self.sequence:
+            return card.rank == Ranks.Ace
+        top_card = self.top_card()
+        if top_card.suit != card.suit:
+            return False
+        return top_card.rank.value + 1 == card.rank.value
 
     def append(self, card):
-        # On ne peut ajouter une carte à la séquence foundation que si elle est un AS de la même famille que la séquence
-        if card.rank == Ranks.ACE:
+        """Ajoute une carte à la pile"""
+        if self.is_valid_move(card):
             self.sequence.append(card)
 
-    # Redéfinition de la méthode top_card pour renvoyer "None" si la séquence foundation est vide
     def top_card(self):
+        """Retourne la carte du dessus de la pile"""
         if self.is_empty():
             return None
         return self.sequence[-1]
 
-    # Redéfinition de la méthode pop pour empêcher la suppression d'une carte dans la séquence foundation
-    def pop(self):
-        return None
-
     def is_empty(self):
+        """Vérifie si la pile est vide"""
         return not bool(self.sequence)
 
     def __str__(self):
-        if self.is_empty():
-            return "[]"
-        return f"[{self.top_card()}]"
+        """Affiche la pile sous forme de chaîne de caractères"""
+        return ", ".join(str(card) for card in self.sequence)
 
+##############################
+# CLASS : Tableau_Sequence #
+##############################
 class Tableau_Sequence(Sequence):
     def move(self, destination):
-        pass
+        """Déplace la carte du dessus de la pile vers la destination"""
+        if self.is_valid_move(destination):
+            destination.append(self.pop())
 
     def is_valid_move(self, destination):
-        return False
+        """Vérifie si le déplacement de la carte du dessus de la pile vers la destination est valide"""
+        if not self.sequence:
+            return False
+        if isinstance(destination, Foundation_Sequence):
+            return False
+        top_card = self.top_card()
+        if isinstance(destination, Tableau_Sequence):
+            return destination.is_valid_move(top_card)
+        elif isinstance(destination, Pile_Sequence):
+            return not destination.is_empty() and destination.top_card().rank.value - 1 == top_card.rank.value and not top_card.same_color(destination.top_card())
+        else:
+            return False
 
     def append(self, card):
+        """Ajoute une carte à la pile"""
         self.sequence.append(card)
 
     def top_card(self):
+        """Retourne la carte du dessus de la pile"""
         if self.is_empty():
             return None
         return self.sequence[-1]
 
     def pop(self):
+        """Retire la carte du dessus de la pile"""
         return self.sequence.pop()
 
     def is_empty(self):
+        """Vérifie si la pile est vide"""
         return not bool(self.sequence)
 
-    def extend(self, card):
-        self.sequence.extend(card)
-
     def __str__(self):
-        if self.is_empty():
-            return "[]"
-        s = ""
-        for card in self.sequence:
-            s += str(card) + ", "
-        return "[" + s[:-2] + "]"
+        """Affiche la pile sous forme de chaîne de caractères"""
+        return ", ".join(str(card) for card in self.sequence)
 
+##########
+# TESTS #
+##########
 if __name__ == '__main__':
     deck = Deck(mask=False)
     deck.shuffle()
-    pile = Pile_Sequence()
-    for _ in range(10):
-        c = deck.deal()
-        pile.append(c)
-    print('pile:', pile)
-    foundation = Foundation_Sequence()
-    valid = pile.is_valid_move(foundation)
-    print('move -> foundation ? ' , valid)
-    if valid:
-        card = pile.pop()
-        foundation.append(card)
-        print('pile:', pile)
-        print('foundation:', foundation)
 
+    # Tableau test
+    tableau = Tableau_Sequence()
+    for i in range(7):
+        for j in range(i + 1):
+            tableau.append(deck.deal())
+        tableau.top_card().flip()
+        print(tableau)
+
+    # Foundation test
+    foundation = Foundation_Sequence()
+    print(foundation.is_valid_move(Card(Ranks.Ace, Suits.Spades)))
+    foundation.append(Card(Ranks.Ace, Suits.Spades))
+    print(foundation)
+    print(foundation.is_valid_move(Card(Ranks.Two, Suits.Spades)))
+    foundation.append(Card(Ranks.Two, Suits.Spades))
 
 
 """
