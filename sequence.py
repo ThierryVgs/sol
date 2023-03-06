@@ -41,9 +41,9 @@ class Pile_Sequence(Sequence):
     def is_valid_move(self, destination):
         if not destination.is_empty():
             top_card = destination.top_card()
-            return top_card.rank == Ranks.KING and len(destination) == 1
+            return top_card.rank == Ranks.K and len(destination) == 1
         else:
-            return self.top_card().rank == Ranks.KING
+            return self.top_card().rank == Ranks.K
 
     def append(self, card):
         self.sequence.append(card)
@@ -84,13 +84,13 @@ class Foundation_Sequence(Sequence):
         if self.is_empty():
             return False
         elif destination.is_empty():
-            return self.top_card().rank == Ranks.ACE
+            return self.top_card().rank == Ranks.A
         else:
             top_card = destination.top_card()
             return self.top_card().rank == top_card.rank + 1 and self.top_card().suit == top_card.suit
 
     def append(self, card):
-        if card.rank == Ranks.ACE and card.suit == self.suit:
+        if card.rank == Ranks.A and card.suit == self.suit:
             self.sequence.append(card)
         elif not self.is_empty() and self.is_valid_move(TableauSequence(card.color)):
             self.sequence.append(card)
@@ -200,9 +200,9 @@ if __name__ == '__main__':
         print(tableau)
 
     # Foundation test
-    foundation = Foundation_Sequence()
-    print(foundation.is_valid_move(Card(Ranks.Ace, Suits.Spades)))
-    foundation.append(Card(Ranks.Ace, Suits.Spades))
+    foundation = Foundation_Sequence(suit='hearts')
+    print(foundation.is_valid_move(Card(Ranks.A, Suits.Spades)))
+    foundation.append(Card(Ranks.A, Suits.Spades))
     print(foundation)
     print(foundation.is_valid_move(Card(Ranks.Two, Suits.Spades)))
     foundation.append(Card(Ranks.Two, Suits.Spades))
