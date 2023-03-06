@@ -5,146 +5,184 @@ from Deck import Deck
 ####################
 # CLASS : Sequence #
 ####################
+
 class Sequence(ABC):
     def __init__(self):
         self.sequence = []
 
-    # Méthode pour retourner la carte du dessus de la séquence
+    @abstractmethod
     def top_card(self):
-        if self.is_empty():
-            return None
-        return self.sequence[-1]
+        pass
 
-    # Méthode pour retirer la carte du dessus de la séquence
+    @abstractmethod
     def pop(self):
-        return self.sequence.pop()
+        pass
 
-    # Méthode abstraite pour déplacer une carte vers une autre séquence
     @abstractmethod
     def move(self, destination):
         pass
 
-    # Méthode abstraite pour vérifier si le déplacement d'une carte vers une autre séquence est valide
     @abstractmethod
     def is_valid_move(self, destination):
         pass
 
-    # Méthode pour ajouter une carte à la séquence
     @abstractmethod
     def append(self, card):
         pass
 
-    # Méthode pour vérifier si la séquence est vide
-    def is_empty(self):
-        return not bool(self.sequence)
+#########################
+# CLASS : PileSequence #
+#########################
 
-#########################
-# CLASS : Pile_Sequence #
-#########################
 class Pile_Sequence(Sequence):
     def move(self, destination):
-        # On ne peut déplacer une carte de la pile que vers une séquence tableau
-        if isinstance(destination, Tableau_Sequence):
-            destination.append(self.pop())
+        destination.append(self.pop())
 
     def is_valid_move(self, destination):
-        # On peut déplacer une carte de la pile vers une séquence tableau si la dernière carte de la séquence tableau est de la même couleur et de rang inférieur à la carte de la pile
-        if isinstance(destination, Tableau_Sequence):
-            if destination.is_empty():
-                return self.top_card().rank == Ranks.KING
-            else:
-                return destination.top_card().is_opposite_color(self.top_card()) and destination.top_card().rank == self.top_card().rank + 1
-        return False
-
-    def append(self, card):
-        self.sequence.append(card)
-
-    # Redéfinition de la méthode top_card pour renvoyer "None" si la pile est vide
-    def top_card(self):
-        if self.is_empty():
-            return None
-        return self.sequence[-1]
-
-###############################
-# CLASS : Foundation_Sequence #
-###############################
-def move(self, destination):
-        """Déplace la carte du dessus de la pile vers la destination"""
-        if self.is_valid_move(destination):
-            destination.append(self.pop())
-
-    def is_valid_move(self, card):
-        """Vérifie si le déplacement de la carte vers la fondation est valide"""
-        if not self.sequence:
-            return card.rank == Ranks.Ace
-        top_card = self.top_card()
-        if top_card.suit != card.suit:
-            return False
-        return top_card.rank.value + 1 == card.rank.value
-
-    def append(self, card):
-        """Ajoute une carte à la pile"""
-        if self.is_valid_move(card):
-            self.sequence.append(card)
-
-    def top_card(self):
-        """Retourne la carte du dessus de la pile"""
-        if self.is_empty():
-            return None
-        return self.sequence[-1]
-
-    def is_empty(self):
-        """Vérifie si la pile est vide"""
-        return not bool(self.sequence)
-
-    def __str__(self):
-        """Affiche la pile sous forme de chaîne de caractères"""
-        return ", ".join(str(card) for card in self.sequence)
-
-##############################
-# CLASS : Tableau_Sequence #
-##############################
-class Tableau_Sequence(Sequence):
-    def move(self, destination):
-        """Déplace la carte du dessus de la pile vers la destination"""
-        if self.is_valid_move(destination):
-            destination.append(self.pop())
-
-    def is_valid_move(self, destination):
-        """Vérifie si le déplacement de la carte du dessus de la pile vers la destination est valide"""
-        if not self.sequence:
-            return False
-        if isinstance(destination, Foundation_Sequence):
-            return False
-        top_card = self.top_card()
-        if isinstance(destination, Tableau_Sequence):
-            return destination.is_valid_move(top_card)
-        elif isinstance(destination, Pile_Sequence):
-            return not destination.is_empty() and destination.top_card().rank.value - 1 == top_card.rank.value and not top_card.same_color(destination.top_card())
+        if not destination.is_empty():
+            top_card = destination.top_card()
+            return top_card.rank == Ranks.KING and len(destination) == 1
         else:
-            return False
+            return self.top_card().rank == Ranks.KING
 
     def append(self, card):
-        """Ajoute une carte à la pile"""
         self.sequence.append(card)
 
     def top_card(self):
-        """Retourne la carte du dessus de la pile"""
         if self.is_empty():
             return None
         return self.sequence[-1]
 
     def pop(self):
-        """Retire la carte du dessus de la pile"""
         return self.sequence.pop()
 
     def is_empty(self):
-        """Vérifie si la pile est vide"""
         return not bool(self.sequence)
 
+    def __len__(self):
+        return len(self.sequence)
+
     def __str__(self):
-        """Affiche la pile sous forme de chaîne de caractères"""
-        return ", ".join(str(card) for card in self.sequence)
+        if self.is_empty():
+            return '[]'
+        else:
+            return str([str(c) for c in self.sequence[:-1]] + [str(self.top_card())])
+
+###############################
+# CLASS : FoundationSequence #
+###############################
+
+class Foundation_Sequence(Sequence):
+    def __init__(self, suit):
+        super().__init__()
+        self.suit = suit
+
+    def move(self, destination):
+        destination.append(self.pop())
+
+    def is_valid_move(self, destination):
+        if self.is_empty():
+            return False
+        elif destination.is_empty():
+            return self.top_card().rank == Ranks.ACE
+        else:
+            top_card = destination.top_card()
+            return self.top_card().rank == top_card.rank + 1 and self.top_card().suit == top_card.suit
+
+    def append(self, card):
+        if card.rank == Ranks.ACE and card.suit == self.suit:
+            self.sequence.append(card)
+        elif not self.is_empty() and self.is_valid_move(TableauSequence(card.color)):
+            self.sequence.append(card)
+        else:
+            raise ValueError(f"Cannot add card {card} to foundation sequence.")
+
+    def top_card(self):
+        if self.is_empty():
+            return None
+        return self.sequence[-1]
+
+    def pop(self):
+        return self.sequence.pop()
+
+    def is_empty(self):
+        return not bool(self.sequence)
+
+    def __len__(self):
+        return len(self.sequence)
+
+    def __str__(self):
+        if self.is_empty():
+            return '[]'
+        return f'[{self.top_card()}]'
+    
+class Tableau_Sequence(Sequence):
+    def __init__(self):
+        super().__init__()
+        self.visible_cards = []  # cartes visibles dans la séquence
+        self.hidden_cards = []  # cartes cachées dans la séquence
+
+    def move(self, destination):
+        # Vérifier si le mouvement est valide
+        if not self.is_valid_move(destination):
+            print("Ce mouvement n'est pas valide.")
+            return
+
+        # Retirer la carte du sommet de la pile visible
+        card = self.visible_cards.pop()
+
+        # Si la pile visible est vide et qu'il y a des cartes cachées,
+        # la dernière carte cachée devient visible
+        if not self.visible_cards and self.hidden_cards:
+            self.visible_cards.append(self.hidden_cards.pop())
+
+        # Ajouter la carte à la destination
+        destination.append(card)
+
+    def is_valid_move(self, destination):
+        # Vérifier si la destination est une pile de fondation
+        if isinstance(destination, Foundation_Sequence):
+            return False
+
+        # Vérifier si la destination est vide
+        if destination.is_empty():
+            return True
+
+        # Récupérer la carte au sommet de la destination
+        top_card = destination.top_card()
+
+        # Vérifier si la couleur est opposée et le rang est inférieur de 1
+        return (not card.color == top_card.color) and (card.rank == top_card.rank - 1)
+
+    def append(self, card):
+        # Ajouter la carte à la pile visible si elle est la première carte ajoutée
+        if not self.visible_cards:
+            self.visible_cards.append(card)
+        else:
+            # Ajouter la carte à la pile cachée
+            self.hidden_cards.append(card)
+
+    def top_card(self):
+        # Retourner la carte du sommet de la pile visible
+        if self.visible_cards:
+            return self.visible_cards[-1]
+        else:
+            return None
+
+    def pop(self):
+        # Retirer la carte du sommet de la pile visible
+        if self.visible_cards:
+            return self.visible_cards.pop()
+        else:
+            return None
+
+    def is_empty(self):
+        # Vérifier si la pile visible et la pile cachée sont vides
+        return not bool(self.visible_cards or self.hidden_cards)
+
+    def extend(self, card):
+        # Ajouter la carte à la pile visible
+        self.visible_cards.append(card)
 
 ##########
 # TESTS #
@@ -158,7 +196,7 @@ if __name__ == '__main__':
     for i in range(7):
         for j in range(i + 1):
             tableau.append(deck.deal())
-        tableau.top_card().flip()
+        tableau.top_card()
         print(tableau)
 
     # Foundation test
