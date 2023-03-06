@@ -9,73 +9,88 @@ class Sequence(ABC):
     def __init__(self):
         self.sequence = []
 
+    # Méthode pour retourner la carte du dessus de la séquence
     def top_card(self):
-        pass
+        if self.is_empty():
+            return None
+        return self.sequence[-1]
 
+    # Méthode pour retirer la carte du dessus de la séquence
     def pop(self):
-        pass
+        return self.sequence.pop()
 
+    # Méthode abstraite pour déplacer une carte vers une autre séquence
     @abstractmethod
     def move(self, destination):
         pass
 
+    # Méthode abstraite pour vérifier si le déplacement d'une carte vers une autre séquence est valide
     @abstractmethod
     def is_valid_move(self, destination):
         pass
 
+    # Méthode pour ajouter une carte à la séquence
     @abstractmethod
     def append(self, card):
         pass
+
+    # Méthode pour vérifier si la séquence est vide
+    def is_empty(self):
+        return not bool(self.sequence)
 
 #########################
 # CLASS : Pile_Sequence #
 #########################
 class Pile_Sequence(Sequence):
     def move(self, destination):
-        destination.append(self.pop())
+        # On ne peut déplacer une carte de la pile que vers une séquence tableau
+        if isinstance(destination, Tableau_Sequence):
+            destination.append(self.pop())
 
     def is_valid_move(self, destination):
+        # On peut déplacer une carte de la pile vers une séquence tableau si la dernière carte de la séquence tableau est de la même couleur et de rang inférieur à la carte de la pile
+        if isinstance(destination, Tableau_Sequence):
+            if destination.is_empty():
+                return self.top_card().rank == Ranks.KING
+            else:
+                return destination.top_card().is_opposite_color(self.top_card()) and destination.top_card().rank == self.top_card().rank + 1
         return False
 
     def append(self, card):
         self.sequence.append(card)
 
+    # Redéfinition de la méthode top_card pour renvoyer "None" si la pile est vide
     def top_card(self):
         if self.is_empty():
             return None
         return self.sequence[-1]
-
-    def pop(self):
-        return self.sequence.pop()
-
-    def is_empty(self):
-        return not bool(self.sequence)
-
-    def __str__(self):
-        if self.is_empty():
-            return "[]"
-        return f"[X, {self.top_card()}]"
 
 ###############################
 # CLASS : Foundation_Sequence #
 ###############################
 class Foundation_Sequence(Sequence):
     def move(self, destination):
+        # On ne peut pas déplacer de carte depuis la séquence foundation
         pass
 
     def is_valid_move(self, destination):
+        # On ne peut pas déplacer de carte vers la séquence foundation depuis une autre séquence
         return False
 
     def append(self, card):
-        self.sequence.append(card)
+        # On ne peut ajouter une carte à la séquence foundation que si elle est un AS de la même famille que la séquence
+        if card.rank == Ranks.ACE:
+            self.sequence.append(card)
 
+    # Redéfinition de la méthode top_card pour renvoyer "None" si la séquence foundation est vide
     def top_card(self):
         if self.is_empty():
             return None
         return self.sequence[-1]
 
+    # Redéfinition de la méthode pop pour empêcher la suppression d'une carte dans la séquence foundation
     def pop(self):
-        return self.sequence.pop()
+        return None
 
     def is_empty(self):
         return not bool(self.sequence)
