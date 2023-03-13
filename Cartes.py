@@ -41,8 +41,8 @@ class Card:
     # Type : Constructeur
     # Input : self, suit, rank, mask=False
     # Returns : None
-    def __init__(self, suit, rank, mask=False): # arguments
-        self.suit = suit # prorpiété
+    def __init__(self, suit, rank, mask=True): 
+        self.suit = suit
         self.rank = rank
         self.mask = mask
 
@@ -57,18 +57,27 @@ class Card:
                (self.suit in [Suits.Spades, Suits.Clubs] and
                 card.suit in [Suits.Spades, Suits.Clubs])
 
-    # Method : same_rank
+    # Method : rankDiffrence
     # Type : Instance Method
     # Input : self, card
     # Returns : bool
-    def same_rank(self, card):
+    def rankDiffrence(self, card):
         return self.rank == card.rank
+    
+    # Method : show
+    # Type : Instance Method
+    # Input : self
+    # Returns : None
+    def show(self):
+        print(self.__str__())
 
     # Methode : __str__ 
     # Type : Instantiation Method
     # Input : self
     # return : str
     def __str__(self):
+        if self.mask:    # Si la carte est masquée
+            return "X, "
         if self.rank.value == 1:        # vérifie si la valeur de la carte est égale à 1, ce qui correspond à l'As.
             rank_str = 'A'
         elif self.rank.value <= 10:     # vérifie si la valeur de la carte est comprise entre 2 et 10 inclus.
@@ -87,10 +96,10 @@ class Card:
             return f"{rank_str} of {suit_str}"  # si non, ben valeur par défaut (noir)
 
 if __name__ == '__main__':
-    card1 = Card(Suits.Hearts, Ranks.A)
-    card2 = Card(Suits.Diamonds, Ranks.K)
-    card3 = Card(Suits.Spades, Ranks.Q)
-    card4 = Card(Suits.Clubs, Ranks.Five)
+    card1 = Card(Suits.Hearts, Ranks.A, True)
+    card2 = Card(Suits.Diamonds, Ranks.K, False)
+    card3 = Card(Suits.Spades, Ranks.Q, True)
+    card4 = Card(Suits.Clubs, Ranks.Five, False)
 
     cards = [card1, card2, card3, card4]
 
@@ -110,8 +119,8 @@ if __name__ == '__main__':
     print(f"{card1} - {card3} same color : {card1.same_color(card3)}")
 
     # Vérifier si une carte a le même rang qu'une autre
-    print(f"\n{card1} - {card2} same rank : {card1.same_rank(card2)}")
-    print(f"{card1} - {card3} same rank : {card1.same_rank(card3)}")
+    print(f"\n{card1} - {card2} same rank : {card1.rankDiffrence(card2)}")
+    print(f"{card1} - {card3} same rank : {card1.rankDiffrence(card3)}")
 
     # Afficher une carte
     two_of_spades = Card(Suits.Spades, Ranks.Two)
@@ -163,4 +172,18 @@ if __name__ == '__main__':
             return f"{colorama.Fore.RED}{rank_str} of {suit_str}{colorama.Style.RESET_ALL}"
         else:
             return f"{rank_str} of {suit_str}" 
+    """
+
+    """
+        def hide(self):
+        #Cache la carte en la marquant comme cachée.
+        self._is_hidden = True
+
+    def expose(self):
+        #Expose la carte en la marquant comme non cachée.
+        self._is_hidden = False
+
+    def is_hidden(self) -> bool:
+        #Retourne si la carte est cachée ou non.
+        return self._is_hidden
     """

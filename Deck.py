@@ -44,43 +44,36 @@ class Deck:
     # Input : self
     # Return : None
     # affiche les 52 cartes de la pile de cartes sur quatre colonnes de 13 cartes chacune.
-    def deal_cards(self):
-        # Affichage des cartes avant le shuffle
-        print("Avant le shuffle:")
-        for i in range(0, 52, 4):
-            print(f"{self.cards[i]}\t\t{self.cards[i+1]}\t\t{self.cards[i+2]}\t\t{self.cards[i+3]}\t") # 0 4 8 12 ...
+    # def deal_cards(self):
+    #     # Affichage des cartes avant le shuffle
+    #     print("Avant le shuffle:")
+    #     for i in range(0, 52, 4):
+    #         print(f"{self.cards[i]}\t\t{self.cards[i+1]}\t\t{self.cards[i+2]}\t\t{self.cards[i+3]}\t") # 0 4 8 12 ...
         
-        # Shuffle des cartes
-        self.shuffle()
+    #     # Shuffle des cartes
+    #     self.shuffle()
         
-        # Affichage des cartes après le shuffle
-        print("\nAprès le shuffle:")
-        for i in range(0, 52, 4):
-            print(f"{self.cards[i]}\t\t{self.cards[i+1]}\t\t{self.cards[i+2]}\t\t{self.cards[i+3]}\t")
+    #     # Affichage des cartes après le shuffle
+    #     print("\nAprès le shuffle:")
+    #     for i in range(0, 52, 4):
+    #         print(f"{self.cards[i]}\t\t{self.cards[i+1]}\t\t{self.cards[i+2]}\t\t{self.cards[i+3]}\t")
     
 if __name__ == '__main__':
-
-    """
     deck = Deck()
     deck.shuffle()
     print("Mon Deck :")
     for i in range(13):
         print(f"{deck.deal()}\t\t{deck.deal()}\t\t{deck.deal()}\t\t{deck.deal()}\t")
-
-    """
-
-    while True:
-        deck = Deck()
-        deck.deal_cards()
-        restart = input("\nVoulez-vous recommencer? (Oui/Non) ")
-        if restart.lower() != 'oui':
-            break
+    # while True:
+    #     deck = Deck()
+    #     deck.deal_cards()
+    #     restart = input("\nVoulez-vous recommencer? (Oui/Non) ")
+    #     if restart.lower() != 'oui':
+    #         break
 
 
 
 # deal doit retourner un objet de type Card
 # comment on précise le type de retour Oo ? 
-"""
- def deal(self) -> Card: 
- 
-"""
+# def deal(self) -> Card: 
+#
